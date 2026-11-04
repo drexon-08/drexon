@@ -1,125 +1,106 @@
+
 #!/bin/bash
 
-DB="student.db"
+FILE="addressbook.txt"
 
 while true
 do
-    echo "====================================="
-    echo "   STUDENT DATABASE MANAGEMENT"
-    echo "====================================="
-    echo "1. Create Database"
-    echo "2. Insert Record"
-    echo "3. Search Record"
+    echo "=========================="
+    echo "      STUDENT ADDRESS BOOK"
+    echo "=========================="
+    echo "1. Create Address Book"
+    echo "2. View Address Book"
+    echo "3. Insert Record"
     echo "4. Delete Record"
-    echo "5. Display Records"
-    echo "6. Modify Record"
-    echo "7. Exit"
+    echo "5. Modify Record"
+    echo "6. Exit"
+    echo "=========================="
 
-    echo -n "Enter your choice: "
-    read ch
+    read -p "Enter your choice: " choice
 
-    case $ch in
+    case $choice in
 
     1)
-        touch $DB
-        echo "Database Created Successfully."
+        touch "$FILE"
+        echo "Address Book Created Successfully."
         ;;
 
     2)
-        echo -n "Enter Roll No: "
-        read roll
-
-        if grep -q "^$roll|" $DB 2>/dev/null
+        if [ -f "$FILE" ]
         then
-            echo "Record already exists."
+            if [ -s "$FILE" ]
+            then
+                echo "Address Book Records:"
+                cat "$FILE"
+            else
+                echo "Address Book is Empty."
+            fi
         else
-            echo -n "Enter Name: "
-            read name
-
-            echo -n "Enter Class: "
-            read class
-
-            echo -n "Enter Marks: "
-            read marks
-
-            echo "$roll|$name|$class|$marks" >> $DB
-            echo "Record Inserted Successfully."
+            echo "Address Book Does Not Exist."
         fi
         ;;
 
     3)
-        echo -n "Enter Roll No to Search: "
-        read roll
+        read -p "Enter Roll No: " id
+        read -p "Enter Student Name: " name
+        read -p "Enter Phone: " phone
+        read -p "Enter City: " city
 
-        if grep "^$roll|" $DB
-        then
-            echo "Record Found."
-        else
-            echo "Record Not Found."
-        fi
+        echo "$id | $name | $phone | $city" >> "$FILE"
+
+        echo "Record Inserted Successfully."
         ;;
 
     4)
-        echo -n "Enter Roll No to Delete: "
-        read roll
-
-        if grep -q "^$roll|" $DB
+        if [ -f "$FILE" ]
         then
-            grep -v "^$roll|" $DB > temp
-            mv temp $DB
-            echo "Record Deleted Successfully."
+            read -p "Enter Roll No to Delete: " id
+
+            if grep -q "^$id |" "$FILE"
+            then
+                grep -v "^$id |" "$FILE" > temp.txt
+                mv temp.txt "$FILE"
+                echo "Record Deleted Successfully."
+            else
+                echo "Record Not Found."
+            fi
         else
-            echo "Record Not Found."
+            echo "Address Book Does Not Exist."
         fi
         ;;
 
     5)
-        echo "-------------------------------------"
-        echo "Roll | Name | Class | Marks"
-        echo "-------------------------------------"
-
-        if [ -s $DB ]
+        if [ -f "$FILE" ]
         then
-            cat $DB
+            read -p "Enter Roll No to Modify: " id
+
+            if grep -q "^$id |" "$FILE"
+            then
+                read -p "Enter New Name: " name
+                read -p "Enter New Phone: " phone
+                read -p "Enter New City: " city
+
+                sed -i "s/^$id |.*/$id | $name | $phone | $city/" "$FILE"
+
+                echo "Record Modified Successfully."
+            else
+                echo "Record Not Found."
+            fi
         else
-            echo "Database Empty."
+            echo "Address Book Does Not Exist."
         fi
         ;;
 
     6)
-        echo -n "Enter Roll No to Modify: "
-        read roll
-
-        if grep -q "^$roll|" $DB
-        then
-            grep -v "^$roll|" $DB > temp
-
-            echo -n "Enter New Name: "
-            read name
-
-            echo -n "Enter New Class: "
-            read class
-
-            echo -n "Enter New Marks: "
-            read marks
-
-            echo "$roll|$name|$class|$marks" >> temp
-            mv temp $DB
-
-            echo "Record Modified Successfully."
-        else
-            echo "Record Not Found."
-        fi
-        ;;
-
-    7)
-        echo "Thank You!"
+        echo "Exiting Address Book..."
         exit
         ;;
 
     *)
-        echo "Invalid Choice!"
+        echo "Invalid Choice."
         ;;
+
     esac
 
+    echo
 done
